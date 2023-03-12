@@ -1,7 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-import YouTube, { YouTubePlayer } from "react-youtube";
+import YouTube from "react-youtube";
+import type { YouTubePlayer } from "react-youtube";
 import { useState } from "react";
 
 import { api } from "~/utils/api";
@@ -11,7 +12,7 @@ const VIDEOID = "dQw4w9WgXcQ";
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
 
-  const [player, setPlayer] = useState<YouTubePlayer>();
+  const [player, setPlayer] = useState<YouTubePlayer>(); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
   const [content, setContent] = useState("");
 
   const comments = api.comment.getAllComments.useQuery({ videoId: VIDEOID });
@@ -19,7 +20,7 @@ const Home: NextPage = () => {
   const { mutate } = api.comment.create.useMutation({
     async onSuccess() {
       setContent("");
-      comments.refetch();
+      await comments.refetch();
     },
   });
 
@@ -57,7 +58,7 @@ const Home: NextPage = () => {
                     mutate({
                       userId: sessionData.user.id,
                       videoId: VIDEOID,
-                      timestamp: Math.floor(player.getCurrentTime()),
+                      timestamp: Math.floor(player.getCurrentTime()), //eslint-disable-line
                       content: content,
                     });
                   }}
@@ -75,7 +76,7 @@ const Home: NextPage = () => {
                     <div className="flex w-full flex-col gap-4">
                       {comments.data?.map((c) => {
                         return (
-                          <p>
+                          <p key={c.id.toString()}>
                             {c.user.name} @{Math.floor(c.timestamp / 60)}m
                             {Math.floor(c.timestamp % 60)}s: {c.content}
                           </p>
